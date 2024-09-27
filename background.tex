@@ -1,0 +1,47 @@
+\section{Background and Related work} \label{sec:2}
+\subsection{CHERI}
+CHERI~\cite{cheri, cheri-technical-manual} is an ISA extension that adds new architectural features to enable fine-grained memory protection. 
+It complements the page-based access protection model that the MMU provides.
+Each pointer in CHERI is a 129-bit CHERI capability with a memory address 
+in the lower 64 bits and other information, such as allowed permissions and range in the next higher 64 bits.
+To ensure that capabilities cannot be tampered with, 
+the architecture also stores an additional tag bit~(129\textsuperscript{th} bit) in separate tag memory, 
+which indicates that the memory address contains a capability.
+If an instruction tries to increase the bounds of the capability or extend its permissions, 
+the tag bit is cleared, thus invalidating the capability.
+When a memory address is accessed via capability, 
+the CPU allows access only if the capability is valid and has the right permissions.
+In "purecap" compilation mode~\cite{cheri_prog_guide}, \textit{every} pointer of an application is treated as a capability, giving the hardware fine-grained information about what memory ranges the application can access.
+The CHERI instruction set also provides an instruction to read the tag bit, 
+which makes it possible to identify pointers stored in memory. 
+This instruction was used by Cornucopia~\cite{cornucopia} and CHERIvoke~\cite{cherivoke} to prevent temporal memory bugs (such as use after free) by scanning the process heap for pointers, i.e., capabilities, at runtime.
+In contrast, we use this instruction to detect addresses to prefetch.
+
+%Sid: Sorry I didn't save the old here, but I also made fewer changes.
+CheriBSD~\cite{cheribsd} is a port of the FreeBSD operating system to CHERI-enabled hardware.
+For an operating system to run on CHERI and to provide CHERI capabilities to its 
+userspace, the port had to change exception handling, process loading, and the swap subsystem.
+We focus only on the swap subsystem modifications made in CheriBSD. 
+When a memory page is swapped out, it might contain CHERI capabilities (pointers), so
+CheriBSD saves those tag bits.
+It then restores those tag bits when the page is swapped back in.
+%The OS reads the bitmap in the trie and restores the tag bits for all the capabilities present 
+%inside this page. 
+This added overhead due to saving and restoring the tag bits is 
+an unavoidable overhead of using CHERI.
+
+%\vspace{-0.45cm}
+\subsection{Page prefetching}
+% Current state of Linux prefetchers
+Page prefetchers are used in most modern operating systems to reduce the latency of page access from swap. 
+Traditional algorithms prefetch based on sequential access to virtual addresses~\cite{vma-readahead, vm_fault_readahead} and are successful at fetching spatially related pages. 
+Leap~\cite{leap} improved traditional prefetching using majority trend detection to identify strided patterns; this makes Leap resilient to short-term irregularities in the memory access stream.
+Leap improved performance for many applications but cannot prefetch irregular accesses. 
+Memliner~\cite{memliner} coordinates memory accesses from the garbage collector (GC) and an application such that GC accesses don't interfere with the application's access history. This technique increases the efficiency of Leap. We focus on prefetching pointer-chasing patterns, which are usually irregular.
+
+% Canvas and memliner and the issues of leap they fixed. 
+Prior work~\cite{dilos, canvas} addressed Leap's shortcomings to varying degrees. Canvas~\cite{canvas} introduced a new mechanism to 1) isolate the swap subsystem and the memory access histories of threads inside the kernel. and 2) issue an upcall to the application-specific prefetcher if the default prefetcher~\cite{vma-readahead} cannot decide which pages to prefetch. The prefetcher runs in the JVM for Java applications and can prefetch pointer-chasing patterns. We focus on prefetching pointers in the general case without changing the language runtime.  DiLOS~\cite{dilos} introduced a libOS-based approach to disaggregated memory that allows the system to perform application-level prefetching without the overhead of upcalls. Using an application-level prefetcher for Redis, DiLOS improves the performance of the kernel prefetcher in prefetching pointer-chasing workloads. CHERI-picking focuses on generalizing such application level approaches.
+
+% AiFM~\cite{aifm} used data structure-specific prefetchers in user space.
+% I'm not yet sure if we want to talk about AIFM because they are purely userspace.
+

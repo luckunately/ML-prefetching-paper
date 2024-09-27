@@ -1,0 +1,169 @@
+
+\section{Evaluation}
+\label{sec:5}
+\begin{comment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}[hb!]
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Workload}                & \textbf{Default} & \textbf{CHERI-picking} \\ \hline
+Sequential linked list traversal & 1,437K           & 1,018K                 \\ \hline
+Random linked list traversal     & 2K               & 1,044K                 \\ \hline
+\end{tabular}%
+}
+\caption{Soft faults on linked list microbenchmarks}
+\label{tab:microbenchmark_results}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{comment}
+% Please add the following required packages to your document preamble:
+% \usepackage{multirow}
+\begin{table*}[]
+\begin{tabular}{|c|ccc|ccc|ccc|}
+\hline
+\multirow{{\textbf{Workload}} & \multicolumn{3}{c|}{\textbf{Soft faults (higher is better)}}                                     & \multicolumn{3}{c|}{\textbf{Major faults (lower is better)}}                                & \multicolumn{3}{c|}{\textbf{Coverage (higher is better)}}                                  \\ \cline{2-10} 
+                                   & \multicolumn{1}{c|}{\textbf{Default}} & \multicolumn{1}{c|}{\textbf{CP}} & \textbf{Change}      & \multicolumn{1}{c|}{\textbf{Default}} & \multicolumn{1}{c|}{\textbf{CP}} & \textbf{Change} & \multicolumn{1}{c|}{\textbf{Default}} & \multicolumn{1}{c|}{\textbf{CP}} & \textbf{Change} \\ \hline
+                                   \hline
+\textbf{Linked list sequential}                   & \multicolumn{1}{c|}{401K}             & \multicolumn{1}{c|}{227K}       & \textcolor{red}{$0.56\times$} & \multicolumn{1}{c|}{23K}           & \multicolumn{1}{c|}{224K}      & \textcolor{red}{$9.3\times$}     & \multicolumn{1}{c|}{94.5\%}           & \multicolumn{1}
+{c|}{50.2\%}     & \textcolor{red}{$0.53\times$}       \\ \hline
+\textbf{Linked list random}                   & \multicolumn{1}{c|}{11K}             & \multicolumn{1}{c|}{236K}       & $21.45\times$ & \multicolumn{1}{c|}{429K}           & \multicolumn{1}{c|}{235K}      & $0.54\times$    & \multicolumn{1}{c|}{2.07\%}           & \multicolumn{1}
+{c|}{50.12\%}     & $24.2\times$       \\ \hline \hline
+\textbf{canneal}                   & \multicolumn{1}{c|}{953K}             & \multicolumn{1}{c|}{3543K}       & $3.7\times$ & \multicolumn{1}{c|}{13.39M}           & \multicolumn{1}{c|}{14.57M}      & \textcolor{red}{$1.08\times$}
+& \multicolumn{1}{c|}{6.47\%}           & \multicolumn{1}{c|}{19.39\%}     & $3\times$       \\ \hline
+\textbf{BFS}                       & \multicolumn{1}{c|}{149K}             & \multicolumn{1}{c|}{204K}        & $1.35\times$         & \multicolumn{1}{c|}{92K}              & \multicolumn{1}{c|}{88K}         & $0.95\times$    & \multicolumn{1}{c|}{62.01\%}          & \multicolumn{1}{c|}{70.27\%}     & $1.13\times$    \\ \hline
+\end{tabular}%
+\caption{
+CHERI-picking (CP) improves the number of soft faults on standard benchmarks by up to $3.7\times$. 
+Values in red indicate instances where CP performs worse than the default prefetcher.
+}
+\label{tab:macrobenchmark-results}
+\end{table*}
+
+
+We assess CHERI-picking's performance on key prefetching metrics by comparing it to the default kernel prefetcher~\cite{vm_fault_readahead}. 
+We use a subset of the workloads we analyzed in ~\autoref{sec:3}. Specifically, we evaluate: the linked list microbenchmark, canneal on the native dataset, and BFS on the Wikipedia-links dataset~\cite{wikipedie-dataset}. We do not further analyze xHPCG as we saw that it is not pointer dense and has relatively few page faults ($\sim$50k). We also don't analyze the array traversal benchmark as the default prefetcher is expected to be effective. We leave further analysis of Redis as future work.
+
+We implemented CHERI-picking in the CheriBSD kernel version 22.12~\cite{cheribsd}, which delays mapping prefetched pages until they are accessed, unlike the default CheriBSD kernel, which proactively maps in prefetched pages.
+We run evaluations on an ARM Morello CHERI-capable processor~\cite{morelloarm} that contains 4 cores running at 2.4GHz. We limit memory so that the working set size of applications is twice that of the available memory, inducing memory pressure. 
+%We ported parsec's canneal~\cite{parsec} and GapBS~\cite{gapbs} to CheriBSD in \texttt{purecap} mode in under an hour.
+
+
+% Details:
+\begin{comment}
+CheriBSD    : 22.12 
+ARM Version : Armv8-A architecture version Armv8.2-A.
+n-cores     : 4
+clock rate  : 2.4 GHz (system Main clock)
+cache config: (below)
+Two dual-core Rainier clusters. Each cluster has:
+◦ 64KB private L1 instruction cache for each core
+◦ 64KB private L1 data cache for each core
+◦ 1MB private L2 unified cache for each core
+◦ 1MB shared L3 unified cache in the DynamIQ™ Shared Unit (DSU) Flash Cache Module
+(FCM)
+
+\end{comment}
+
+
+
+
+
+
+We evaluate prefetching performance using the following metrics:
+%\vspace{-0.2cm}
+\begin{itemize}[wide, labelindent=3pt]
+    \item \textbf{Soft faults:} These page faults occur when a page is already in memory, but not mapped into an application's address space;
+    indicating the prefetcher's prediction capacity. 
+    \item \textbf{Major faults:} These page faults occur when the page is not present in memory and indicate the faults not predicted by the prefetcher, encompassing mandatory misses and prefetcher miss predictions. 
+    \item \textbf{Coverage:} The percentage of page faults that were satisfied by previously prefetched pages.
+    %CHERI-picking.
+\end{itemize}
+In ~\autoref{sec:6}, we discuss CHERI-picking performance overhead and challenges.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{comment}
+\begin{table}[]
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{|l|l|}
+
+\hline
+\textbf{Workload}           & \textbf{System}                \\
+\hline
+Random Linked list traversal & Microbenchmark          \\
+\hline
+Sequential Linked list traversal          & Microbenchmark                  \\
+\hline
+Canneal on native dataset                     & Parsec benchmark suite~\cite{parsec}           \\
+\hline
+BFS on wikipedia-links dataset~\cite{wikipedie-dataset}      & GapBS~\cite{gapbs} (default processing system)  \\
+\hline
+\end{tabular}
+}
+\caption{Workloads and benchmarks used for evaluation}
+\label{tab:evaluation_workloads}
+\end{table}
+\end{comment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\vspace{-0.2cm}
+\subsection{Microbenchmark results}
+\label{sec:5.1}
+
+\begin{comment}
+We use two different versions of the linked list microbenchmark from ~\autoref{sec:3}. In one, we traverse the list in allocation order, and in the other, we traverse the elements in random order. 
+Each node of the linked list is a page size. We allocate a total of 500k pages (equal to 2GB).
+When the linked list is traversed in allocation order, the page access order is sequential as well, due to continuous allocations. 
+We expect that the default prefetcher is effective for this workload and the results in ~\autoref{tab:macrobenchmark-results} confirm this. 
+However, since each page access is a pointer-based access, CHERI-picking also runs.
+%CHERI-picking's predictions interfere with the default prefetcher's semantics.
+At a major fault, CHERI-picking predicts the next node of the linked list.
+This prediction disrupts the default prefetcher's expectation of two sequential major faults, as the default prefetcher needs two faults to ensure that a sequential pattern exists.
+Additionally, because the page accesses are sequential, the default prefetcher can prefetch 16 pages at each major fault. CHERI-picking only prefetches one pointer that is present on the currently faulted linked list node.
+This interference issue could be resolved by combining the two prefetching algorithms.
+
+
+In the case of linked list traversal in random order, CHERI-picking outperforms the default prefetcher by predicting faults using pointers, because CHERI-picking runs at major faults, it will predict the next node for the currently faulted node, but it won't prefetch in-depth, thus the node following the prefetched node will again cause a major fault. On the other hand, the default prefetcher fails to predict any of the faults. 
+This scenario can be reproduced in various pointer-chasing workloads where the allocation and access order of data structures differ and when datastructures are randomly accessed.
+\end{comment}
+
+We use two different versions of the linked list microbenchmark from ~\autoref{sec:3}. In one version, we traverse the list in allocation order, while in the other, we traverse the elements in random order. We allocate a total of 500k pages (equal to 2GB). When we order the pages in allocation order (sequential), the default prefetcher proves effective, as demonstrated in ~\autoref{tab:macrobenchmark-results}. The default prefetcher's initial prediction requires two sequential major faults to detect a sequential pattern. 
+\begin{comment}
+Afterward, it prefetches a set number of pages and continues to prefetch pages accurately for each subsequent major fault. 
+However, since we currently do not communicate any information between the default prefetcher and CHERI-picking, CHERI-picking also runs on each page and predicts just one page (the next one in the list) to prefetch.
+This means that the two sequential major faults that the default prefetcher needs to detect sequential access never happen.
+Thus, CHERI-picking actually makes things worse!
+Additionally, since CHERI-picking does not run on soft faults (yet), this benchmarks requires one hard fault for each prefetch, so CHERI-picking prefetches only 50\% of the faults.
+\end{comment}
+However, CHERI-picking, which also prefetches pages here due to pointer-chasing, eliminates the second major fault and prevents the default prefetcher from detecting the sequential pattern. Further, CHERI-picking is worse than the default prefetcher here, because it prefetches one page at a time (in the current prototype), while the default prefetcher could fetch several (minimum 7 pages).
+This interference issue could be resolved by combining the two prefetching algorithms or communicating between them.
+
+When we order the pages randomly, CHERI-picking works as expected and outperforms the default prefetcher; as we saw above, it still prefetches only 50\% of the faulting pages, due to its not running at soft fault time. Given the random order of page accesses, the default prefetcher fails to predict any of the faults.
+This scenario can be present in various pointer-chasing workloads where the data structure's allocation and access order 
+differ.
+
+\subsection{Standard Benchmarks}
+We next ran the BFS and canneal benchmarks described in ~\autoref{sec:3}. We set the \texttt{prefetch\_count} to four pages for these tests as analysis indicates that these benchmarks are pointer-dense.
+
+The default prefetcher predicts 900k faults for the canneal benchmark, 6.47\% of the total page faults.
+CHERI-picking predicts 3M faults, covering 19.39\%, and improving upon the default prefetcher by $3\times$. The canneal benchmark maintains a list of elements, with each element containing two lists of pointers to other elements in the elements list. 
+The benchmark first randomly indexes into the elements list to select an element and then traverses through every element in the two lists within the selected element.
+The randomness in indexing the first element makes it challenging to prefetch. 
+However, CHERI-picking can predict the pointers accessed by the two lists inside the element, leading to an increase in soft faults and coverage compared to the default prefetcher.
+
+The default prefetcher worked well for BFS, based on the results from ~\autoref{fig:kernel_prefetcher_performance}. 
+CHERI-picking improves coverage by $13\%$ over the default prefetcher, demonstrating that pointer prefetchers can improve coverage for BFS, albeit only by a small amount.
+
+\subsection{CHERI-picking overhead}
+\label{sec:overhead}
+%The astute reader will have noticed that so far, we have focused only on the accuracy of the prefetcher and artfully side-stepped performance issues. 
+Currently, CHERI-picking has two major sources of overhead. First, when we traverse the page looking for pointers, this adds latency to the page fault. Second, when we don't prefetch the page early enough (timeliness), it leads to blocking soft faults. 
+The execution time of the sequential linked list microbenchmark with
+CHERI-picking is twice that of the default prefetcher because
+CHERI-picking adds about $7\mu$s to every page fault (which is clearly unacceptable)
+and also disrupts the default kernel prefetcher (\autoref{sec:5.1}).
+The execution time of the random linked list microbenchmark is the same for both prefetchers.
+Even though this is a pointer-chasing workload, we do not see a performance boost, because
+CHERI-picking also causes many blocking soft faults, which occur when a prefetched page is still in transit from disk. In part, this is due to the nature of our microbenchmark; we do not process the nodes on the list at all. In reality, there will be some processing on each node in the list, which could mitigate these blocking faults.
+In canneal, for example, only 13\% of soft faults block.
+

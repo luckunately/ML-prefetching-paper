@@ -1,0 +1,39 @@
+\vspace{-0.2cm}
+\section{Challenges and Future work} 
+\label{sec:6}
+
+Our focus in CHERI-picking was to demonstrate the feasibility of a generalized kernel pointer prefetcher. However, the prototype is not yet a complete implementation. While CHERI-picking improves coverage for BFS and canneal, it does not reduce the number of major faults for canneal; Canneal is a pointer-dense benchmark and a challenging one for CHERI-picking.
+Each faulted page contains many pointers; canneal first indexes into a pointer array randomly. 
+If that access causes a page fault, CHERI-picking will prefetch 4 pages that will not be used.
+In fact, CHERI-picking prefetches 30 million pages, but only about 10\% of those are ever accessed.
+BFS provides a nice contrast here; although it too is pointer dense, since we are traversing the entire data structure, every pointer prefetched is ultimately accessed. This results in 5\% fewer major faults compared to the default prefetcher. Optimizing the CHERI-picking policy parameters such as \texttt{prefetch\_count} is critical to reduce thrashing. 
+
+%We must be cautious when selecting the backend device, considering the overheads in CHERI-picking and the fact that it only executes after swapping in the faulted page. The cost of scanning a page might still be lower than slower backend devices like disks and SSDs. However, the scanning cost might be a bottleneck for faster far memory devices like CXL-attached memory or RDMA. To address this, we plan to leverage existing swap data structures maintained by CheriBSD~\cite{cheribsd} and investigate executing the CHERI-picking algorithm asynchronously.  Additionally, potential future hardware-based optimizations for scanning processes can help remove the overhead.
+
+There are several avenues of performance optimization that we intend to investigate to address the overheads of CHERI-picking. First, we need to add better communication between the swap system, the default prefetcher, and CHERI-picking; by re-using swap data structures, we can optimize the CHERI-picking policy and record sufficient metadata to prevent CHERI-picking from running for cases when the default prefetcher is effective.
+Second, we do not run CHERI-picking on soft-faulting pages, but doing so asynchronously provides for more aggressive prefetching.
+Third, blindly prefetching a fixed number of pages on every faulted-in page is unlikely to be a good strategy; we need to explore how to better identify the right pointers to prefetch. Fourth, optimizing the I/O requests that CHERI-picking issues is essential; along with examining CHERI-picking performance on other swap backends such as RDMA. The overhead of scanning pages might be a bottleneck for faster swap backends such as CXL-attached memory or RDMA. To maintain performance in these scenarios, investigating techniques such as asynchronous execution of the CHERI-picking algorithm will be critical.  Additionally, potential future hardware optimizations such as scanning the tags in hardware while copying a page can help remove the overhead.
+%Fourth, optimizing our I/O stack and using a faster swap backend, such as RDMA with CHERI-picking, will reduce blocking faults and improve performance.
+
+%CHERI-picking results in numerous blocking soft faults, these are faults occurring on a page that was prefetched but is still in transit from disk. 
+%\textcolor{red}{add a line about how to handle processes that may not have CHERI caps.}
+%While not all faults are blocking soft faults (e.g., canneal experiences 400K blocked soft faults, accounting for 13\% of soft faults), further enhancing the policy and analyzing the application are crucial steps to improve the system and achieve lower execution time. 
+%We will continue with the analysis and optimization of our implementation to demonstrate improvements in real workloads such as Redis.
+
+
+%\vspace{-0.5cm}
+\section{Conclusion} 
+
+CHERI-picking represents an initial step towards integrating application-specific prefetchers in the kernel.
+Our analysis reveals that both applications and benchmarks exhibit pointer-chasing patterns that the default kernel prefetcher fails to predict effectively. 
+Through evaluation, we demonstrate benchmarks where the kernel prefetcher's effectiveness is limited, while CHERI-picking successfully predicts future accesses. 
+CHERI-picking significantly enhances coverage for two standard benchmarks, improving it by up to a factor of three. 
+However, much remains to be done to transform our prototype into a practical reality.
+
+\section*{Acknowledgments}
+The authors would like to thank --  Robert Watson for access to Morello hardware; George Neville-Neil, Jessica Clarke, Brooke Davis, John Baldwin, and Mark Johnston for their help with CheriBSD; Reto Achermann, Joel Nider, and the anonymous reviewers of PLOS for their feedback on the draft. We acknowledge the support of the Natural Sciences and Engineering Research Council of Canada (NSERC).
+%Although the results highlight the effectiveness of CHERI-picking, further work is necessary to enhance its performance with real workloads. CHERI-picking must address the problem of predicting pointers quickly to improve performance and prefetch pointers before they are actually accessed. This has been discussed in previous research on caching~\cite{cache-analysis, cache-mowry-pointer}. If the work done between two pointer accesses is not sufficiently long, the prefetcher may not achieve significant savings. We encountered a similar issue during the linked list traversal. However, page prefetchers have the advantage of prefetching multiple pointers as a page can accommodate numerous pointers. This distinction sets page prefetchers apart from cache prefetchers.
+
+%While we built upon existing prefetchers and chose to execute CHERI-picking during major faults, additional analysis is required to determine when to invoke CHERI-picking. This decision plays a crucial role in enhancing the potential to prefetch pointers before they are accessed and improving the prefetcher's accuracy. One approach is to also run CHERI-picking during soft faults, as traditional prefetchers do not benefit from such instances, whereas CHERI-picking can. Furthermore, it is essential to explore tunable parameters that can significantly impact the overhead of CHERI-picking. These parameters include determining the number of pointers to prefetch from a single page, the depth of exploration, and the direction of prefetching. By investigating these aspects, we can better understand and optimize CHERI-picking.
+
+%CHERI-picking serves as a foundation for integrating pointer prefetchers within the kernel. However, further analysis and exploration are necessary to transform pointer prefetchers into a practical reality.

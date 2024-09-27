@@ -1,0 +1,15 @@
+\section{Introduction}
+% DRAM is a bottleneck in datacenters.
+Increasing memory requirements for applications, e.g., machine learning, coupled with the slowdown of DRAM scaling~\cite{dram-1, dram-2}, makes DRAM one of the costliest components in data centers, constituting as much as 30\% of the entire cost~\cite{meta}. To accommodate increasing application memory demands without breaking the bank, operators often resort to far memory or memory disaggregation~\cite{aifm, canvas, dilos, fastswap, google, infiniswap, leap, memliner}. 
+Far memory incorporates additional tiers of slower memory, such as NVM, SSDs, or software-based approaches, e.g., compressed swap~\cite{zswap-1, google, meta}. These tiers store memory pages that are less frequently accessed, freeing up costly DRAM for hot data.
+
+
+% Current state of far memory systems in datacenters and their implementation.
+There are various approaches to accessing far memory, such as application transparent approaches that use the swap subsystem~\cite{canvas, google, meta, fastswap, leap} or accessing far memory from userspace~\cite{aifm, hemem}. Regardless of the approach, accurate eviction and prefetching policies are essential to maintain application performance in the presence of far memory.
+Leap demonstrated that effective memory page prefetching in the kernel increases application performance by up to $10 \times$~\cite{leap}. 
+Kernel prefetchers similar to Leap rely on information collected during page faults to accurately predict strided accesses~\cite{vma-readahead, vm_fault_readahead, leap}. However, these prefetchers are ineffective at predicting irregular memory access patterns such as pointer-based accesses~\cite{CP, canvas, dilos}.
+
+We propose a different approach of using Machine learning to do page prefetching.
+
+Prior ML approaches for cache prefetching formulate the problem of predicting the next address to prefetch. We approach it differently, we formulate prefetching as a binary classification problem. 
+

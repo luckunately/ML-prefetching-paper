@@ -1,0 +1,58 @@
+
+\section{Implementation}
+
+\subsection{Design} 
+Analyzer and the traces that are given as input. 
+
+\subsection{Perf probe}
+Describe the perf probe changes and the place that we put the probe and how it works and the data captured. 
+
+\subsection{PIN tool design}
+Describe the design of the pintool and what it does and how it does it. 
+
+\subsection{Analysis merging}
+Describe the analysis algorithm and how the merge works. This is pretty straightforward. Talk about potential loss of data.
+
+
+\section{Evaluation}
+We will report 3 sections here - 
+\begin{itemize}
+    \item The percentage of pagefaults that can be attributed to pointers for a wide variety of workloads.
+    \item The performance of the vma readahead prefetcher~\cite{vma-readahead} on pointer-based pagefaults vs non-pointer based pagefaults.
+\end{itemize}
+
+Which workloads should we capture?
+Smaller workloads - 
+\begin{itemize}
+    \item parsec.canneal 
+    \item xhpcg
+    \item spec 2006 from classifying paper. 
+    \item workloads from hopp
+\end{itemize}
+
+Real applications - 
+\begin{itemize}
+    \item VoltDB
+    \item Spark from canvas
+    \item Redis from Dilos
+    \item gapbs algorithms
+    \item GraphX from HoPP
+    \item Workloads from google paper
+    \item workloads from tmo paper.
+    \item graph mining workloads
+\end{itemize}
+
+\section{Related work}
+\begin{itemize}
+    \item Classifying memory access patterns for prefetching. 
+    \item Angela thesis. 
+\end{itemize}
+
+\begin{itemize}
+    \item Leap
+    \item HoPP
+    \item Canvas
+    \item AiFM
+    \item Fastswap
+    \item others...
+\end{itemize}

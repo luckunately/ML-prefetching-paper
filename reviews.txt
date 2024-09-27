@@ -1,0 +1,245 @@
+PLOS 2023 Paper #64 Reviews and Comments
+===========================================================================
+Paper #64 CHERI-picking: Leveraging capability hardware for prefetching
+
+
+Review #64A
+===========================================================================
+
+Overall merit
+-------------
+2. Weak reject
+
+Reviewer expertise
+------------------
+3. Knowledgeable
+
+Paper summary
+-------------
+The paper describes CHERI-picking, a new strategy to do page-level prefetching
+based on pointer analysis in pages. Since CHERI allows (under certain
+circumstances) to identify all pointers in memory, it is possible to find all
+pointers in a page that may subsequently be dereferenced. Pointers to
+currently unmapped pages may therefore indicate which pages will be accessed
+next, based common time/space locality patterns in memory accesses. A
+CHERI-picking prototype is built into CheriBSD and evaluated using a number of
+pointer-heavy workloads.
+
+Strengths and weaknesses
+------------------------
++ independent of programming language or runtime system
++ improvement over history-based prefetchers demonstrated for certain
+  workloads
+
+- major details about the evaluation setup are unclear
+- many low-hanging fruit to pick in prototype, which may therefore not provide
+  an accurate assessment of the approach
+
+Comments for authors
+--------------------
+Thanks for submitting to PLOS! The approach of using something like CHERI to
+accurately identify pointers looks like a promising prefetcher strategy.
+
+The potential for improved performance through CHERI-picking is demonstrated
+for several workloads, but the evaluation also shows that there are still some
+hurdles to overcome. The authors acknowledge that the integration and
+interaction with the default prefetcher in (Cheri)BSD is not ideal. And some
+benchmarks ("Linked list sequential") confirm that, either through high CPU
+overhead, or through rather unfortunate interference with the default
+prefetcher (which apparently cannot be disabled). Clearly, there are some
+low-hanging fruit to be picked (pun intended), especially with regard to
+better integrating the prefetcher with the fault-handling / prefetching
+subsystem in the kernel.
+
+Another issue I see is that the evaluation only covers the occurrence /
+prevention of (major) page faults, but not the actual application performance.
+Only for one benchmark ("Linked list sequential"), a performance penalty of
+about 50 percent is mention around line 586 in the text. But I wonder what the
+effect is on all the other workloads. In the end, it is the overall
+performance and efficiency that counts and that should be fairly easy to
+measure (and probably has been measured, I would imagine). Of course, the
+choice of storage (local/remote SSD, remote RAM, ...) will have quite some
+influence on performance and a complete evaluation will require more space
+than available in a workshop paper. But a limited set of end-to-end
+performance numbers would contribute to making the evaluation more convincing.
+
+Maybe related to CPU overhead issues is the current design and implementation
+of the CHERI-picking algorithm. Line 14 of Algorithm 1 shows that pages are
+scanned linearly for pointers, starting at offset 0. Searching stops at the
+point where "prefetch_count"-many pointers into currently unmapped pages have
+been found. This approach ignores potentially many pointers at larger offsets
+in the page. Designing a better algorithm and balancing search overhead vs
+accuracy is certainly difficult; and addressing this issue is identified as
+future. However, since the authors conducted a study about how pointers
+influence page faults (in Sec. 3), it would have been interesting to see how
+the basic approach from Algorithm 1 actually performs in terms of prediction.
+
+Also, about prediction accuracy: What is the influence of setting
+"prefetch_count" to "four pages" (line 549 in the manuscript) on the
+prediction accuracy and coverage? Why is 4 a good choice for the "standard
+benchmarks" (Sec. 5.2) and not 2 or 17 or 32? Would the results for "major
+faults" and "coverage" be different?
+
+Before that, the discussion of "microbenchmarks results" in Sec. 5.1 raised a
+number of questions for me, too. First, there is this statement in lines
+527-531:
+
+"However, CHERI-picking, which also prefetches pages here due to
+pointer-chasing access pattern, eliminates the second major fault and prevents
+the default prefetcher from the detecting sequential pattern".
+
+I wondered, why the default prefetcher is even relevant here? In lines
+531-533, the authors then state:
+
+"CHERI-picking is worse than the default prefetcher here, because it
+prefetches one page at a time (in the current prototype)"
+
+At first, I was quite puzzled about this, as it looked a bit like
+cherry-picking benchmark configurations (pun intended). Especially, because
+"prefetch_count > 1" is possible according to the rest of the paper. But then
+I realized that CHERI-picking cannot do any better in this benchmark, because
+in a linked list of page-size nodes, it cannot inspect the next (still to be
+prefetched) page to read-ahead more than one page.
+
+I think the paper should have better explained this look-ahead issue. But more
+importantly, this benchmark shows quite clearly that the CHERI-picking
+algorithm (at least in its current form) cannot replace history-based
+prefetchers like those in Linux or BSD. Instead, it should augment them. This
+is not clearly written in the paper (or the point did not come across for me),
+although it seems like a substantial outcome of the experiments in this paper
+and a key design aspect.
+
+Overall, I would very much like to see a better-integrated version of
+CHERI-picking that is more thoroughly evaluated.
+
+Finally, some more (small) areas for improvement and typos to be fixed:
+
+- Not a major issue, but something that should be pointed out clearly in the
+  paper, is the mixture of benchmarking platforms. Based on references to the
+  Linux prefetcher [15] and Linux cgroups [20] in the text, the authors use
+  both Linux and (Cheri)BSD as a benchmarking platform. In particular, the
+  motivating study described in Sec. 3 has been conducted on Linux. If the
+  study has been done on a different platform, because not all benchmarks run
+  on (Cheri)BSD, this should be mentioned in the text. Or was it better
+  availability of instrumentation/tooling on Linux (or x86, as the text says
+  "Intel PIN [21]"; or some an ARM variant of it?) ... In any case, please
+  explain it in the paper to avoid the impression of arbitrarily mixing
+  configurations.
+- line 300: add space between "(Tab. 1)." and "In"
+- algorithm 1, line 3: wrong condition? Instead of "prefetch_count < count"
+  shouldn't it be "count < prefetch_count"?
+- line 329: the word "both" is superfluous in this sentence
+- line 489: suddenly, there is "BFS on Wikipedia-links dataset", but in Table
+  1, "BFS on twitter dataset" is introduced. If there is suddenly a new
+  benchmark (Wikipedia), then why?
+
+
+
+Review #64B
+===========================================================================
+
+Overall merit
+-------------
+4. Accept
+
+Reviewer expertise
+------------------
+3. Knowledgeable
+
+Paper summary
+-------------
+The authors introduce a novel kernel pointer prefetcher based on CHERI. This method doesn't require any changes to the applications, profiling, or offline analysis, making it easy to adopt. The paper claims that this new approach is more effective than traditional methods for workloads having random memory access patterns. It also highlights some of the challenges, such as the overheads involved in discovering pointers and blocking faults.
+
+Strengths and weaknesses
+------------------------
++ The paper studies that the kernel's default prefetcher is only effective for specific types of access patterns, usually sequential or strided. It does not perform well for arbitrary or random access patterns commonly found in pointer-chasing operations.
+
++ The CHERI-picking approach offers a novel way to enhance prefetching by utilizing hardware-level capabilities provided by CHERI. The paper also sheds lights on avenues for optimization and integration.
+
++ The paper acknowledges main sources of overhead of the proposed approach and also discusses several possible approaches to mitigate such overhead. It also means that significant amount of further is needed to make the proposed approach practically feasible.
+
+- Overhead: The process of traversing a page to identify pointers to prefetch adds latency to page fault resolution, which could be detrimental to overall system performance.
+
+- Unnecessary prefetching: CHERI-picking prefetches a large number of pages that end up not being used, wasting resources and possibly leading to cache pollution.
+
+- Fixed Prefetch Count: The approach uses a fixed number of pages to prefetch on each fault, which is acknowledged to be suboptimal.
+
+Comments for authors
+--------------------
+Thank you for submitting your paper to PLOS '23. I found the paper to be well-articulated, offering sufficient background information that aids in understanding the research. The novelty of the proposed approach is commendable, and it shows promise for advancing the state-of-the-art. While the approach is not yet fully realized, the potential for further refinement and improvement is stated. Please refer to my detailed comments above.
+
+
+
+Review #64C
+===========================================================================
+
+Overall merit
+-------------
+5. Strong accept
+
+Reviewer expertise
+------------------
+4. Expert
+
+Paper summary
+-------------
+This paper proposes the use of CHERI capability tags to detect pointers in pages freshly populated on a page fault, allowing the kernel prefetcher to independently follow pointer chains in order to improve its performance on e.g. sparse, pointer-heavy workloads. The authors present several benchmarks on an unmodified BSD kernel suggesting that the existing prefetcher fails to prefetch the majority of faulted pages on pointer-heavy workloads such as canneal and redis.
+
+We are presented with a prototype implemented in CheriBSD running on ARM Morello hardware. The prefetcher scans pages on hard faults for embedded pointers, and queues further loads from backing store up to a configurable limit. Reevaluating on the same workloads shows a generally large improvement in prefetcher coverage, albeit with pathological interaction on simple linked lists and no overall improvement in performance due to such interactions with the default prefetcher and the cost of scanning pages.
+
+Strengths and weaknesses
+------------------------
+Pro
+==
+ * A very nice idea, clearly laid out and well motivated.
+ * Evaluation on actual ARM HW is good to see, and greatly increases my confidence in the results.
+ * The idea definitely has promise, and shows impressive coverage improvements in certain workloads.
+
+Con
+==
+ * Scanning cost does seem a major drawback esp. for soft faults or far memory.
+
+Comments for authors
+--------------------
+I very much enjoyed this paper, and appreciate the care with which you've laid out and motivated your idea, and the clarity with which the implementation is presented and evaluated. I feel this will make a great contribution to the program.
+
+I do want to bring up the issue of the overheads/overall performance, not as a limitation of the current paper, but rather as topic of discussion and shaping future work. Negative results are fine, and the interaction with the default prefetcher in the linked list example is pretty clearly solveable, but the overhead of scanning pages seems to me something that is likely to impose an unavoidable limit at some point.
+
+You're presently limiting the scan to hard faults, where the cost of the disk access (even on an SSD) likely dominates the cost of the scan, and I assume that this is one reason you do so. As you note yourselves, extending to run on soft faults would increase the prefetching opportunities but increase the relative cost of the scan. Once we start thinking about faulting pages in from far memory (e.g. over CXL or similar), then I wouldn't be surprised if the cost of scanning the page on the CPU was now the bottleneck.
+
+Again, none of this is "missing" from the paper, which is great, but it would be really great to get some insight into how you would attempt to address these challenges, and whether, for example, there might be some aspect of the CHERI/Morello architecture that might usefully be changed to make such an application more efficient (e.g. interpreting the tags in hardware while the pages are copied). Basically, a paragraph or two on this sort of forward-looking, architecture-critical discussion would be a great addition, given you've likely now got insights into details of the platform that the rest of us haven't.
+
+
+
+Review #64D
+===========================================================================
+
+Overall merit
+-------------
+4. Accept
+
+Reviewer expertise
+------------------
+3. Knowledgeable
+
+Paper summary
+-------------
+In this paper, the authors discuss how to leverage hardware capabilities in CHERI for prefetching when handling pointer-chasing workloads. The challenging part of prefetching for pointer-chasing workloads is that the kernel does not have information about which memory contains pointer values. But on CHERI, there is a tag memory area holding information about which memory contains capabilities (or pointers). Thus, the authors propose to use the information in the tag memory areas to decide which memory pages to be prefetched.
+
+Strengths and weaknesses
+------------------------
++ Leveraging CHERI’s capability information for prefetching is a smart idea. 
+- Whether CHERI will be used in data centers is unclear.
+
+Comments for authors
+--------------------
+Thanks a lot for submitting your paper to PLOS’2023. 
+
++ Leveraging CHERI’s capability information for prefetching is a smart idea. 
+
+I like the idea of using CHERI’s tag memory area to figure out which memory area contains capabilities/pointers and further utilize this information for prefetching. Moreover, the authors conduct experiments to showcase the limitations of the default prefetcher when handling pointer-chasing workloads and use the results to motivate the proposed technique. Overall, a cute idea is well motivated by the authors. 
+
+
+- Whether CHERI will be used in data centers is unclear. 
+
+CHERI is designed mainly for security purposes and it brings runtime overhead. However, data centers have limited attack surfaces and security may not be a major concern. Thus, programmers care more about performance for data centers. Overall, I doubt whether data centers will use CHERI and the proposed technique may not have a reasonable scenario to be used.
