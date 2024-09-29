@@ -73,6 +73,10 @@
 \definecolor{mPurple}{rgb}{0.58,0,0.82}
 \definecolor{backgroundColour}{rgb}{0.95,0.95,0.92}
 
+% disable ~\cite{*} for now
+\renewcommand{\cite}[1]{}
+
+
 \lstdefinestyle{CStyle}{
     backgroundcolor=\color{backgroundColour},   
     commentstyle=\color{mGreen},
@@ -208,7 +212,7 @@
 %% This command processes the author and affiliation and title
 %% information and builds the first part of the formatted document.
 \settopmatter{printfolios=true}
-\maketitle
+% \maketitle
 
 \input{introduction}
 
@@ -226,8 +230,8 @@
 %%
 %% The next two lines define the bibliography style to be used, and
 %% the bibliography file.
-\bibliographystyle{ACM-Reference-Format}
-\bibliography{sample-base}
+% \bibliographystyle{ACM-Reference-Format}
+% \bibliography{sample-base}
 \end{document}
 \endinput
 %%
