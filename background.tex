@@ -26,4 +26,31 @@ Past success of machine learning in cache eviction~\cite{RelaxedBelady} and cach
 % Previous work~\cite{LMAP} has shown that machine learning can be used to predict page accesses and prefetch pages with high accuracy.
 
 \subsubsection{LSTM based prefetching}
-LSTM, first introduced in 1997~\cite{LSTM}, is a type of recurrent neural network that is capable of learning long-term dependencies.
+
+LSTM, first introduced in 1997~\cite{LSTM}, is a type of recurrent neural network that is capable of learning long-term dependencies. An LSTM is composed of a cell $c$, a hidden state $h$, an input gate $i$, an output gate $o$, and a forget gate $f$. The cell remembers values over arbitrary time intervals and the three gates regulate the flow of information into and out of the cell. The hidden state $h$ is recurrent and is passed to the next time step. The process of an LSTM to process an input $x_t$ at time step $t$ is as follows:
+
+\begin{enumerate}
+    \item Parrellelly compute the input gate $i_t$, forget gate $f_t$, and output gate $o_t$.\begin{align*}
+        i_t &= \sigma(W_{xi}x_t + W_{hi}h_{t-1} + W_{ci}c_{t-1} + b_i)\\
+        f_t &= \sigma(W_{xf}x_t + W_{hf}h_{t-1} + W_{cf}c_{t-1} + b_f)\\
+        o_t &= \sigma(W_{xo}x_t + W_{ho}h_{t-1} + W_{co}c_{t-1} + b_o)
+    \end{align*}
+    Here, $W$ and $b$ are the weights and biases of the gates, and $\sigma$ is the sigmoid function.
+    \item Update the cell state $c_t$ and hidden state $h_t$.\begin{align*}
+        c_t &= f_t \odot c_{t-1} + i_t \odot \tanh(W_{xc}x_t + W_{hc}h_{t-1} + b_c)\\
+        h_t &= o_t \odot \tanh(c_t)
+    \end{align*}
+    Here, $\odot$ is the element-wise multiplication operator.
+\end{enumerate}
+
+LSTM has shown promising results in cache prefetching~\cite{LMAP} due to its ability to learn long-term dependencies. However, LSTM has a large number of parameters and is computationally expensive to train and run.
+
+\subsubsection{Transformer based prefetching}
+
+\textbf{CHECK OUT THIS PAPER}
+\cite{Twilight}
+\textbf{TO BE ADDED}
+
+\subsubsection{Large Language Models based prefetching}
+
+\textbf{TO BE ADDED}
