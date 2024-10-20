@@ -5,13 +5,15 @@ In this section, we introduce the design and implementation of our LSTM, Transfo
 
 \subsection{LSTM based Prefetcher} \label{sec:4.1}
 
-We implement an LSTM based prefetcher based on past work~\cite{LMAP}. 
 \begin{figure}[]
 \centering
 \includegraphics[width=\columnwidth]{images/LSTM.png}
 \caption{LSTM based prefetcher architecture.}
 \label{fig:lstm}
+\Description{A diagram showing the architecture of an LSTM based prefetcher.}
 \end{figure}
+
+We implement an LSTM based prefetcher based on past work~\cite{LMAP}. It is shown at a high level in \autoref{fig:lstm}.
 
 Each input offset, output offset and pc are encoded as a one hot representation of the total classes. Then the one hot encoding is embeded in a high dimensional space. The embeddings are then concatenated and fed to the LSTM. The LSTM outputs the probability of the next page to prefetch. To get multiple pages to prefetch, we can apply softmax on the output and sample from the distribution. 
 

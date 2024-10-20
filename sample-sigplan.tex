@@ -73,10 +73,6 @@
 \definecolor{mPurple}{rgb}{0.58,0,0.82}
 \definecolor{backgroundColour}{rgb}{0.95,0.95,0.92}
 
-% disable ~\cite{*} for now
-\renewcommand{\cite}[1]{}
-
-
 \lstdefinestyle{CStyle}{
     backgroundcolor=\color{backgroundColour},   
     commentstyle=\color{mGreen},
@@ -150,42 +146,48 @@
 %% Of note is the shared affiliation of the first two authors, and the
 %% "authornote" and "authornotemark" commands
 %% used to denote shared contribution to the research.
- \author{Shaurya Patel}
-% \authornote{Both authors contributed equally to this research.}
-%\email{spatel27@student.ubc.ca}
- \affiliation{%
-   \institution{University of British Columbia}
- }
+%  \author{Shaurya Patel}
+% % \authornote{Both authors contributed equally to this research.}
+% %\email{spatel27@student.ubc.ca}
+%  \affiliation{%
+%    \institution{University of British Columbia}
+%    \country{Canada}
+%  }
 
-  \author{Tom Wang}
-% \authornote{Both authors contributed equally to this research.}
-%\email{siagraw@student.ubc.ca}
- \affiliation{%
-   \institution{University of British Columbia}
- }
+%   \author{Tom Wang}
+% % \authornote{Both authors contributed equally to this research.}
+% %\email{siagraw@student.ubc.ca}
+%  \affiliation{%
+%    \institution{University of British Columbia}
+%    \country{Canada}
+
+%  }
 
  
 
-  \author{Joshua}
-% \authornote{Both authors contributed equally to this research.}
-%\email{siagraw@student.ubc.ca}
- \affiliation{%
-   \institution{University of Waterloo}
- }
+% %   \author{Joshua}
+% % % \authornote{Both authors contributed equally to this research.}
+% % %\email{siagraw@student.ubc.ca}
+% %  \affiliation{%
+% %    \country{Canada}
+% %    \institution{University of Waterloo}
+% %  }
 
- \author{Margo Seltzer}
-% \authornote{Both authors contributed equally to this research.}
-%\email{mseltzer@cs.ubc.ca}
- \affiliation{%
-   \institution{University of British Columbia}
- }
+%  \author{Margo Seltzer}
+% % \authornote{Both authors contributed equally to this research.}
+% %\email{mseltzer@cs.ubc.ca}
+%  \affiliation{%
+%     \institution{University of British Columbia}
+%     \country{Canada}
+%  }
  
-  \author{Alexandra Fedorova}
-% \authornote{Both authors contributed equally to this research.}
-%\email{sasha@ece.ubc.ca}
- \affiliation{%
-   \institution{University of British Columbia}
- }
+%   \author{Alexandra Fedorova}
+% % \authornote{Both authors contributed equally to this research.}
+% %\email{sasha@ece.ubc.ca}
+%  \affiliation{%
+%     \institution{University of British Columbia}
+%    \country{Canada}
+%  }
 
 %%
 %% By default, the full list of authors will be used in the page
@@ -212,7 +214,7 @@
 %% This command processes the author and affiliation and title
 %% information and builds the first part of the formatted document.
 \settopmatter{printfolios=true}
-% \maketitle
+\maketitle
 
 \input{introduction}
 
@@ -230,8 +232,8 @@
 %%
 %% The next two lines define the bibliography style to be used, and
 %% the bibliography file.
-% \bibliographystyle{ACM-Reference-Format}
-% \bibliography{sample-base}
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{sample-base}
 \end{document}
 \endinput
 %%

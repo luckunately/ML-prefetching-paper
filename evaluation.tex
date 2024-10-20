@@ -2,6 +2,10 @@
 \section{Evaluation}
 \label{sec:5}
 
+Correct prefetching choices can significantly reduce the number of page faults and improve the performance of applications. However, wrong prefetching choices can lead to unnecessary page faults due to memory pollusion and degrade performance. In this section, we evaluate the performance of the proposed ML prefetchers on a set of workloads and compare them with the state-of-the-art prefetcher, LEAP~\cite{leap}.
+
+\subsection{Metrics}
+
 We use memory access traces of benchmark workloads to evaluate the performance of the proposed ML prefetchers. The metrics we will focus on is:
 
 \begin{definition}
@@ -12,7 +16,11 @@ We use memory access traces of benchmark workloads to evaluate the performance o
     \text{Accuracy} = $\frac{\text{Page faults predicted by prefetching}}{\text{Total predictions}}$
 \end{definition}
 
-We use LEAP\cite{leap} as the baseline prefetcher for our evaluations to compare with the proposed ML prefetchers. 
+Coverage measures the percentage of page faults that were satisfied by the prefetcher. A higher coverage indicates that the prefetcher is able to predict more page faults. Accuracy measures the percentage of correct predictions made by the prefetcher. A higher accuracy indicates that the prefetcher is making correct predictions.
+
+We want both coverage and accuracy to be high. However, there is a trade-off between the two. A prefetcher can achieve high coverage by prefetching aggressively, but this may lead to a decrease in accuracy. On the other hand, a prefetcher can achieve high accuracy by prefetching conservatively, but this may lead to a decrease in coverage. 
+
+We focus on the coverage metric as it is more important for prefetchers in our experiment since none of our prefetchers are aggressive. \textbf{TODO: HOW TO WORD THIS BETTER?}
 
 \subsection{Data Collection and processing}
 
@@ -21,7 +29,7 @@ To collecte page faults, we use \texttt{fltrace}~\cite{fltrace}, which will inte
 Privous work~\cite{LMAP} has suggested that offsets of page address accesses works better than absolute addresses, and since we are doing classification, we need to filter out the rare classes and only leave up to 50,000 most occured classes for offsets and pc values.
 
 \begin{definition}
-    \text{Offset} = $\text{Next Page Address} - \text{Last Page address}$
+    {Offset} = {Next Page Address} - {Last Page address}
 \end{definition}
 
 \texttt{fltrace} will need local RAM size to be set to run. It simulates the physical memory the program can access. Since each workload has a different memory requirement, we set the local RAM size to be 25\% and 50\% of the maximum memory requirement of the workload. This can be found by running \texttt{/usr/bin/time -v ./workload} and looking at the \texttt{Maximum resident set size}.
@@ -32,7 +40,7 @@ We chose the following workloads for our evaluation:\begin{itemize}
     \item SPEC2017~\cite{SPEC2017}: mcf omnetpp and lbm with the default input files offered by the benchmark suite.
     \item GAP~\cite{gapbs}: the default \texttt{bfs, pr, bc} workloads on the \texttt{twitter} dataset~\cite{twitter-dataset}.
     \item WiredTiger~\cite{wiredtiger}: the default \texttt{ycsb-a} and \texttt{ycsb-c} workloads with \texttt{icount=30000000} in the benchmark configuration file.
-    \item DiLos-redis~\cite{redis, DiLOS}: the \texttt{redis-benchmark} workload with \texttt{lrange} on a list of queries made by DiLOS~\cite{DiLOS}.
+    \item DiLos-redis~\cite{redis, dilos}: the \texttt{redis-benchmark} workload with \texttt{lrange} on a list of queries made by DiLOS~\cite{dilos}.
 \end{itemize}
 
 \subsection{Analysis}
