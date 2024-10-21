@@ -1,9 +1,9 @@
-\section{Design and Implementation} \label{sec:4}
+\section{Design and Implementation}\label{sec:4}
 
 In this section, we introduce the design and implementation of our LSTM, Transformer, and LLM based prefetchers. 
 
 
-\subsection{LSTM based Prefetcher} \label{sec:4.1}
+\subsection{LSTM based Prefetcher}\label{sec:4.1}
 
 \begin{figure}[]
 \centering
@@ -15,13 +15,34 @@ In this section, we introduce the design and implementation of our LSTM, Transfo
 
 We implement an LSTM based prefetcher based on past work~\cite{LMAP}. It is shown at a high level in \autoref{fig:lstm}.
 
-Each input offset, output offset and pc are encoded as a one hot representation of the total classes. Then the one hot encoding is embeded in a high dimensional space. The embeddings are then concatenated and fed to the LSTM. The LSTM outputs the probability of the next page to prefetch. To get multiple pages to prefetch, we can apply softmax on the output and sample from the distribution. 
+Each input offset, output offset and pc are encoded as a one hot representation of the total classes. Then the one hot encoding is embeded in a high dimensional space. The embeddings are then concatenated and fed to the LSTM The LSTM outputs the probability of the next page to prefetch. To get multiple pages to prefetch, we can apply softmax on the output and sample from the distribution. 
 
 \begin{itemize}
     \item Embeding dimension: 128
     \item LSTM hidden dimension: 128
     \item Number of LSTM layers: 2
 \end{itemize}
+
+
+
+\subsection{Transformer based Prefetcher}\label{sec:4.2}
+
+\subsection{Large Language Model based Prefetcher}\label{sec:4.3}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 % We begin by providing an overview of page fault handling in CheriBSD~\cite{cheribsd} to illustrate how CHERI-picking fits into the existing code. Traditional prefetchers rely on memory access history, which is accessible at page fault time, whereas CHERI-picking relies on the \emph{contents} of memory pages, which is available only after a page has been swapped in. This algorithmic difference produces a rather different implementation described in ~\autoref{sec:DI_CP_Policy}.
 
 % \subsection{CheriBSD swap workflow}

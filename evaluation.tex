@@ -26,13 +26,7 @@ We focus on the coverage metric as it is more important for prefetchers in our e
 
 To collecte page faults, we use \texttt{fltrace}~\cite{fltrace}, which will interpose on all \textbf{heap allocations}. Thus, we can collect page faults for all heap accesses. Stack accesses are excluded from the analysis since stack page faults are rare and are not the focus of this work.
 
-Privous work~\cite{LMAP} has suggested that offsets of page address accesses works better than absolute addresses, and since we are doing classification, we need to filter out the rare classes and only leave up to 50,000 most occured classes for offsets and pc values.
-
-\begin{definition}
-    {Offset} = {Next Page Address} - {Last Page address}
-\end{definition}
-
-\texttt{fltrace} will need local RAM size to be set to run. It simulates the physical memory the program can access. Since each workload has a different memory requirement, we set the local RAM size to be 25\% and 50\% of the maximum memory requirement of the workload. This can be found by running \texttt{/usr/bin/time -v ./workload} and looking at the \texttt{Maximum resident set size}.
+\texttt{fltrace} will need local RAM size to be set to run. It simulates the physical memory the program can access. Since each workload has a different memory requirement, we set the local RAM size to be 25\% and 50\% of the maximum memory requirement of the workload. This can be found by running \texttt{/usr/bin/time -v <workload>} and looking at the \texttt{Maximum resident set size}.
 
 \subsection{Workloads}
 

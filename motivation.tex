@@ -1,19 +1,49 @@
 
-\section{Problem Statement} \label{sec:3}
+\section{Motivation}\label{sec:3}
 
 \textbf{WHAT MOTIVATES OUR WORK?}
 
-Possible accessible virtual memory pages for a program is enonourmous. It is normal for program to access several 10th of GBs of memory. Then that would be easy to get a billion of possible pages the program will access. It is hard to predict which page the program will access next and to prefetch it before the program access it.
+Possible accessible virtual memory pages for a program is enonourmous. It is normal for program to access more than 1 GB of memory. Then that would be easy to get millions of possible pages the program will access. It is hard to predict which page the program will access next and to prefetch it before the program access it.
+
+\subsection{Scope and Limitations}
+
+\textbf{WHAT IS THE SCOPE OF OUR WORK?}
+
+The scope of this work is to design a application-specific machine learning based page prefetcher that can predict the next page the program will access with high accuracy.
+
+\textbf{WHAT ARE THE LIMITATIONS OF OUR WORK?}
 
 \subsection{Information to be used for prefetching}
 
 \textbf{WHAT INFORMATION CAN BE USED FOR PREFETCHING?}
+
+There are lots of information that we can capture while a program is running. While collecting more information can help in predicting the next page the program will access, it can also increase the overhead of the prefetcher.
+
+In this work, we will use the following information for prefetching:
+\begin{enumerate}
+    \item The virtual address of the page that caused the page fault.
+    \item The program counter of the memory access instruction.
+\end{enumerate}
+
+These information are easily reachable and meaningful for prefetching.
 
 \subsection{Prefeching as a classification problem}
 
 Past work~\cite{LMAP} suggested that although page addresses are number, regression models are not suitable for prefetching. Instead, prefetching can be treated as a classification problem.
 
 We treat the address space as a large, discrete vocabulary and perform classification. 
+
+\textbf{DO WE TALK ABOUT OFFSET HERE?}
+
+At the same time, the number of possible pages that can be accessed is very large. This makes the encoding of the page addresses as one-hot vectors very large. Also fixed encoding of the page addresses can be problematic as address randomization can change the encoding of the page addresses.
+
+Privous work~\cite{LMAP} has suggested that offsets of page address accesses works better than absolute addresses, and since we are doing classification, we need to filter out the rare classes and only leave up to 50,000 most occured classes for offsets and pc values.
+
+\begin{definition}
+    {Offset} = {Next Page Address} - {Last Page address}
+\end{definition}
+
+
 %\begin{figure*}[t!]
 %    \centering
 %    \begin{subfigure}[t]{0.7\columnwidth}
