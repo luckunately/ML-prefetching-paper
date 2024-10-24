@@ -5,9 +5,9 @@
 % Current state of Linux prefetchers
 Page prefetchers are used in most modern operating systems to reduce the latency of page access from swap. 
 Traditional algorithms prefetch based on sequential access to virtual addresses~\cite{vma-readahead, vm_fault_readahead} and are successful at fetching spatially related pages. 
-One of the recent state of art prefetcher, Leap~\cite{leap}, improved traditional prefetching using majority trend detection to identify strided patterns; this makes Leap resilient to short-term irregularities in the memory access stream.
+One of the recent state-of-art prefetcher, Leap~\cite{leap}, improved traditional prefetching using majority trend detection to identify stride patterns; this makes Leap resilient to short-term irregularities in the memory access stream.
 Leap improved performance for many applications but cannot prefetch irregular accesses. 
-Multiple researchs have tried to improve Leap's performance by addressing its shortcomings~\cite{canvas, dilos, memliner} in \begin{itemize}
+Multiple researchers have tried to improve Leap's performance by addressing its shortcomings~\cite{canvas, dilos, memliner} in \begin{itemize}
     \item prefetching irregular patterns,
     \item isolating the swap subsystem and memory access histories of threads, and
     \item coordinating memory accesses from the garbage collector and the application.
@@ -17,7 +17,7 @@ All the above resulted in the non-perfect prefetching performance of the prefetc
 
 \textbf{HOW TO CONTRAST OUR WORK WITH TRADITIONAL PREFETCHING?}
 
-Studies~\cite{Aggressive} has shown the need for more aggressive prefetching to reduce the number of page faults while scrificing some protability and memory bandwidth. Thus, we propose a machine learning based prefetcher that can improve the prefetching accuracy and reduce the number of page faults.
+Studies~\cite{Aggressive} has shown the need for more aggressive prefetching to reduce the number of page faults while sacrificing some portability and memory bandwidth. Thus, we propose a machine learning based prefetcher that can improve the prefetching accuracy and reduce the number of page faults.
 
 \subsection{Machine Learning Prefetching}
 Past success of machine learning in cache eviction~\cite{RelaxedBelady} and cache prefetching~\cite{LMAP} has shown that machine learning can be used to predict page accesses patterns with high accuracy.
@@ -30,7 +30,7 @@ Past success of machine learning in cache eviction~\cite{RelaxedBelady} and cach
 LSTM, first introduced in 1997~\cite{LSTM}, is a type of recurrent neural network that is capable of learning long-term dependencies. An LSTM is composed of a cell $c$, a hidden state $h$, an input gate $i$, an output gate $o$, and a forget gate $f$. The cell remembers values over arbitrary time intervals and the three gates regulate the flow of information into and out of the cell. The hidden state $h$ is recurrent and is passed to the next time step. The process of an LSTM to process an input $x_t$ at time step $t$ is as follows:
 
 \begin{enumerate}
-    \item Parrellelly compute the input gate $i_t$, forget gate $f_t$, and output gate $o_t$.\begin{align*}
+    \item Compute the input gate $i_t$, forget gate $f_t$, and output gate $o_t$ in parallel.\begin{align*}
         i_t &= \sigma(W_{xi}x_t + W_{hi}h_{t-1} + W_{ci}c_{t-1} + b_i)\\
         f_t &= \sigma(W_{xf}x_t + W_{hf}h_{t-1} + W_{cf}c_{t-1} + b_f)\\
         o_t &= \sigma(W_{xo}x_t + W_{ho}h_{t-1} + W_{co}c_{t-1} + b_o)

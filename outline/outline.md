@@ -53,7 +53,7 @@
     - RAM size -> `/usr/bin/time -v <workload>` -> `Maximum resident set size`. 50% and 25% of this value.
   - workloads (Expecting memory intensive workloads)
     - SPEC2017
-    - wiredtiger
+    - wiredTiger
     - Redis
     - GAP
     - spark? (tried multiple repo, cannot make it work)
@@ -64,7 +64,7 @@
     - LLM
   - Analysis
     - Comparison
-    - Why LSTM is not the best model for prefetching (catostrophic forgetting)
+    - Why LSTM is not the best model for prefetching (catastrophic forgetting)
 
 ## Challenges and future work
 TODO
