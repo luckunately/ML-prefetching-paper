@@ -13,28 +13,29 @@ We use memory access traces of benchmark workloads to evaluate the performance o
 \end{definition}
 
 \begin{definition}
-    \text{Accuracy} = $\frac{\text{Page faults predicted by prefetching}}{\text{Total predictions}}$
+    \text{Accuracy} = $\frac{\text{Page faults predicted by prefetching}}{\text{Total Page Prefetched}}$
 \end{definition}
+
 
 Coverage measures the percentage of page faults that were satisfied by the prefetcher. A higher coverage indicates that the prefetcher is able to predict more page faults. Accuracy measures the percentage of correct predictions made by the prefetcher. A higher accuracy indicates that the prefetcher is making correct predictions.
 
 We want both coverage and accuracy to be high. However, there is a trade-off between the two. A prefetcher can achieve high coverage by prefetching aggressively, but this may lead to a decrease in accuracy. On the other hand, a prefetcher can achieve high accuracy by prefetching conservatively, but this may lead to a decrease in coverage. 
 
-We focus on the coverage metric as it is more important for prefetchers in our experiment since none of our prefetchers are aggressive. \textbf{TODO: HOW TO WORD THIS BETTER?}
+While both coverage and accuracy are crucial, our focus is on coverage since a high coverage rate indicates effective prefetching, even if it comes with a slight trade-off in accuracy. Our prefetchers are designed to be conservative, avoiding a too aggressive prefetching that could lead to performance degradation. \textbf{TODO: HOW TO WORD THIS BETTER?}
 
 \subsection{Data Collection and processing}
 
-To collect page faults, we use \texttt{fltrace}~\cite{fltrace}, which will interpose on all \textbf{heap allocations}. Thus, we can collect page faults for all heap accesses. Stack accesses are excluded from the analysis since stack page faults are rare and are not the focus of this work.
+To collect page faults, we use \texttt{fltrace}~\cite{fltrace}, which will interpose on all \textbf{heap allocations}. Thus, we can collect page faults for all heap accesses. Stack accesses are excluded from the analysis since stack page faults are rare since the stack is contiguous and grows linearly. It is not normal for a program to have a large stack which would cause a page fault. Thus stack is not the focus of this work.
 
 \texttt{fltrace} will need local RAM size to be set to run. It simulates the physical memory the program can access. Since each workload has a different memory requirement, we set the local RAM size to be 25\% and 50\% of the maximum memory requirement of the workload. This can be found by running \texttt{/usr/bin/time -v <workload>} and looking at the \texttt{Maximum resident set size}.
 
 \subsection{Workloads}
-
 We chose the following workloads for our evaluation:\begin{itemize}
-    \item SPEC2017~\cite{SPEC2017}: mcf omnetpp and lbm with the default input files offered by the benchmark suite.
-    \item GAP~\cite{gapbs}: the default \texttt{bfs, pr, bc} workloads on the \texttt{twitter} dataset~\cite{twitter-dataset}.
-    \item WiredTiger~\cite{wiredtiger}: the default \texttt{ycsb-a} and \texttt{ycsb-c} workloads with \texttt{icount=30000000} isn the benchmark configuration file.
-    \item DiLos-redis~\cite{redis, dilos}: the \texttt{redis-benchmark} workload with \texttt{lrange} on a list of queries made by DiLOS~\cite{dilos}.
+    \item SPEC2017~\cite{SPEC2017}: mcf omnetpp and lbm with the default input files offered by the benchmark suite. These represent different access patterns and workloads typical in real-world applications.
+    \item GAP~\cite{gapbs}: the default \texttt{bfs, pr, bc} workloads on the \texttt{twitter} dataset~\cite{twitter-dataset}. These provide insights into the behavior of graph-processing algorithms in a huge graph.
+    \item WiredTiger~\cite{wiredtiger}: the default \texttt{ycsb-a} and \texttt{ycsb-c} workloads with \texttt{icount=30000000} in the default benchmark configuration file. Evaluates the performance on database benchmarks.
+    \item DiLos-redis~\cite{redis, dilos}: the \texttt{redis-benchmark} workload with \texttt{lrange} on a list of queries made by DiLOS~\cite{dilos}. Highlights how our prefetcher performs under NoSQL database workloads.
+    \item \textbf{TODO: NEED VICTOR'S WORKLOADS}
 \end{itemize}
 
 \subsection{Analysis}

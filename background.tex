@@ -13,6 +13,10 @@ Multiple researchers have tried to improve Leap's performance by addressing its 
     \item coordinating memory accesses from the garbage collector and the application.
 \end{itemize}
 
+\textbf{WHAT ARE THE SHORTCOMINGS OF TRADITIONAL PREFETCHING?}
+
+One stunning outcome of our initial experiments was that the \texttt{lbm} benchmark from SPEC2017~\cite{SPEC2017} revealed the huge flaw in LEAP~\cite{leap}. \textbf{ADD THE LINK TO THE GRAPH LATER} LEAP prefetches pages based on the majority trend of the memory access stream. However, the \texttt{lbm} benchmark has an simple alternating access pattern that LEAP cannot predict since none of the strides are in the majority. This resulted in LEAP prefetching pages that were never accessed, leading to a large number of page faults. 
+
 All the above resulted in the non-perfect prefetching performance of the prefetcher in our initial experiments.
 
 \textbf{HOW TO CONTRAST OUR WORK WITH TRADITIONAL PREFETCHING?}
@@ -24,6 +28,8 @@ Past success of machine learning in cache eviction~\cite{RelaxedBelady} and cach
 
 \textbf{NEED MORE PREVIOUS WORKS}
 % Previous work~\cite{LMAP} has shown that machine learning can be used to predict page accesses and prefetch pages with high accuracy.
+
+\textbf{WHAT IS THE GAP OUR WORK IS TRYING TO FILL? WHAT IS THE PREVIOUS WORK MISSING?}
 
 \subsubsection{LSTM based prefetching}
 
@@ -43,7 +49,8 @@ LSTM, first introduced in 1997~\cite{LSTM}, is a type of recurrent neural networ
     Here, $\odot$ is the element-wise multiplication operator.
 \end{enumerate}
 
-LSTM has shown promising results in cache prefetching~\cite{LMAP} due to its ability to learn long-term dependencies. However, LSTM has a large number of parameters and is computationally expensive to train and run. 
+\textbf{MAYBE MORE CITATIONS ON PREFETCHING USING LSTM}
+LSTM has shown promising results in cache prefetching~\cite{LMAP,Twilight} due to its ability to learn long-term dependencies. However, LSTM has a large number of parameters and is computationally expensive to train and run. 
 
 \subsubsection{Transformer based prefetching}
 
